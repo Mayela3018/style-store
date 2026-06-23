@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() {
   runApp(const StyleStoreApp());
@@ -36,6 +37,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const WelcomeScreen(),
     const HomeScreen(),
+    const DashboardScreen(),
   ];
 
   @override
@@ -63,6 +65,10 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.checkroom),
             label: 'Prendas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Dashboard',
           ),
         ],
       ),
