@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text('${prenda.categoria} • Talla ${prenda.talla}',
+                            Text('${prenda.categoria} • Tallas: ${prenda.tallasList.join(', ')}',
                                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                             const SizedBox(height: 4),
                             Row(

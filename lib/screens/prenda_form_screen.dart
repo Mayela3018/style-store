@@ -3,7 +3,7 @@ import '../models/prenda.dart';
 import '../database/database_helper.dart';
 
 class PrendaFormScreen extends StatefulWidget {
-  final Prenda? prenda; // null = agregar, con datos = editar
+  final Prenda? prenda;
 
   const PrendaFormScreen({super.key, this.prenda});
 
@@ -19,11 +19,11 @@ class _PrendaFormScreenState extends State<PrendaFormScreen> {
   late TextEditingController _stockCtrl;
 
   String _categoriaSeleccionada = 'Polos';
-  String _tallaSeleccionada = 'M';
   String _colorSeleccionado = 'Negro';
+  List<String> _tallasSeleccionadas = [];
 
   final List<String> _categorias = ['Polos', 'Pantalones', 'Vestidos', 'Blusas', 'Shorts', 'Chaquetas'];
-  final List<String> _tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  final List<String> _tallasDisponibles = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   final List<String> _colores = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Rosa', 'Amarillo', 'Morado'];
 
   @override
@@ -35,8 +35,8 @@ class _PrendaFormScreenState extends State<PrendaFormScreen> {
 
     if (widget.prenda != null) {
       _categoriaSeleccionada = widget.prenda!.categoria;
-      _tallaSeleccionada = widget.prenda!.talla;
       _colorSeleccionado = widget.prenda!.color;
+      _tallasSeleccionadas = widget.prenda!.tallasList;
     }
   }
 
@@ -51,11 +51,21 @@ class _PrendaFormScreenState extends State<PrendaFormScreen> {
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_tallasSeleccionadas.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecciona al menos una talla'),
+          backgroundColor: Color(0xFFE91E8C),
+        ),
+      );
+      return;
+    }
+
     final prenda = Prenda(
       id: widget.prenda?.id,
       nombre: _nombreCtrl.text.trim(),
       categoria: _categoriaSeleccionada,
-      talla: _tallaSeleccionada,
+      tallas: _tallasSeleccionadas.join(','),
       precio: double.parse(_precioCtrl.text),
       stock: int.parse(_stockCtrl.text),
       color: _colorSeleccionado,
@@ -87,6 +97,7 @@ class _PrendaFormScreenState extends State<PrendaFormScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(_nombreCtrl, 'Nombre de la prenda', Icons.checkroom),
               const SizedBox(height: 16),
@@ -94,9 +105,84 @@ class _PrendaFormScreenState extends State<PrendaFormScreen> {
                 setState(() => _categoriaSeleccionada = val!);
               }),
               const SizedBox(height: 16),
-              _buildDropdown('Talla', _tallas, _tallaSeleccionada, Icons.straighten, (val) {
-                setState(() => _tallaSeleccionada = val!);
-              }),
+
+              // Selector de tallas múltiples
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.straighten, color: const Color(0xFFE91E8C), size: 20),
+                        const SizedBox(width: 8),
+                        const Text('Tallas disponibles',
+                            style: TextStyle(fontSize: 14, color: Colors.black87)),
+                        const SizedBox(width: 8),
+                        if (_tallasSeleccionadas.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE91E8C),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text('${_tallasSeleccionadas.length} seleccionadas',
+                                style: const TextStyle(color: Colors.white, fontSize: 11)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _tallasDisponibles.map((talla) {
+                        final seleccionada = _tallasSeleccionadas.contains(talla);
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (seleccionada) {
+                                _tallasSeleccionadas.remove(talla);
+                              } else {
+                                _tallasSeleccionadas.add(talla);
+                              }
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: seleccionada
+                                  ? const Color(0xFFE91E8C)
+                                  : Colors.pink.shade50,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: seleccionada
+                                    ? const Color(0xFFE91E8C)
+                                    : Colors.pink.shade200,
+                              ),
+                            ),
+                            child: Text(
+                              talla,
+                              style: TextStyle(
+                                color: seleccionada ? Colors.white : Colors.pink.shade400,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 16),
               _buildDropdown('Color', _colores, _colorSeleccionado, Icons.color_lens, (val) {
                 setState(() => _colorSeleccionado = val!);

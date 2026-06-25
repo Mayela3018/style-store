@@ -278,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 14)),
                                         Text(
-                                            '${p.categoria} • Talla ${p.talla}',
+                                            '${p.categoria} • Tallas: ${p.tallasList.join(', ')}',
                                             style: TextStyle(
                                                 color: Colors.grey.shade600,
                                                 fontSize: 12)),
